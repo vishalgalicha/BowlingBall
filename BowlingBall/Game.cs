@@ -5,18 +5,14 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace BowlingBall
-{
-    public class Game
+{ 
+    public class GameRoll : IGameRoll
     {
-        public int totalScore = 0;
-
-        public int TotalScore(int addScore)
+        public readonly IGameScore _gameScore;
+        public GameRoll(IGameScore gameScore)
         {
-            //Get Total score by adding frame pins
-            totalScore += addScore;
-            return totalScore;
+            _gameScore = gameScore;
         }
-        
         public void Roll(int[][] framePins)
         {
             // Add your logic here. Add classes as needed.
@@ -32,20 +28,20 @@ namespace BowlingBall
                 {
                     prevFrame = 10 + bowl1;
                     spare = false;
-                    TotalScore(prevFrame);
+                    _gameScore.TotalScore(prevFrame);
                 }
 
                 int prevFrameTwo;
                 if (strikeTwo == true && bowl1 == 10)  //if double strike and also third is strike
                 {
                     prevFrameTwo = 30;
-                    TotalScore(prevFrameTwo);
+                    _gameScore.TotalScore(prevFrameTwo);
                 }
                 if (strikeTwo == true && bowl1 != 10) //if double strike and third is not strike
                 {
                     strikeTwo = false;
                     prevFrameTwo = 10 + 10 + bowl1;
-                    TotalScore(prevFrameTwo);
+                    _gameScore.TotalScore(prevFrameTwo);
                 }
                 if (strike == true && bowl1 == 10) //if strike and second is also strike
                 {
@@ -55,16 +51,14 @@ namespace BowlingBall
 
                 if (bowl1 < 10) //if pins falled in first chance are less than 10
                 {
-                    bowl2 = framePins[frame][1]; //get pins falled in second chance
-                    if (bowl1 + bowl2 == 10) //if it is spare
-                    {
-                        spare = true;  //all 10 pins dropped in two chances
-                    }
+                    bowl2 = framePins[frame][1]; //get pins falled in second chance                    
+
+                    spare = (bowl1 + bowl2 == 10) ? true : false;
 
                     if (strikeTwo == true && frame == 9) //if double strike and frame is last
                     {
                         prevFrameTwo = 10 + 10 + bowl2;
-                        TotalScore(prevFrameTwo);
+                        _gameScore.TotalScore(prevFrameTwo);
                         strikeTwo = false;
                     }
 
@@ -72,12 +66,12 @@ namespace BowlingBall
                     {
                         strike = false;
                         prevFrame = 10 + bowl1 + bowl2;
-                        TotalScore(prevFrame);
+                        _gameScore.TotalScore(prevFrame);
                     }
                     if (spare != true && strike != true && strikeTwo != true) //if no spare, no strike or double strike then just add points of pins
                     {
                         int frameScore = bowl1 + bowl2;
-                        TotalScore(frameScore);
+                        _gameScore.TotalScore(frameScore);
                     }
                 }
                 else
@@ -92,7 +86,7 @@ namespace BowlingBall
                     if (strikeTwo == true) //if last frame and strike in second chance as well
                     {
                         prevFrameTwo = 10 + 10 + bowl2;
-                        TotalScore(prevFrameTwo);
+                        _gameScore.TotalScore(prevFrameTwo);
                         strikeTwo = false;
                     }
                 }
@@ -100,23 +94,17 @@ namespace BowlingBall
                 if (frame == 9 && (spare == true || strike == true))//if last frame and its spare or strike
                 {
                     extraFrame = framePins[frame][2];
-                    if (strike == true) 
+                    if (strike == true)
                     {
                         prevFrame = 10 + bowl2 + extraFrame;
-                        TotalScore(prevFrame);
+                        _gameScore.TotalScore(prevFrame);
                     }
                     else
                     {
-                        totalScore = totalScore + 10 + extraFrame;
+                        _gameScore.TotalScore(extraFrame + 10);
                     }
                 }
             }
-        }
-
-        public int GetScore()
-        {
-            // Returns the final score of the game.
-            return totalScore;
         }
     }
 }
